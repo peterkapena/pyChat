@@ -18,29 +18,21 @@ print('The server is ready to receive')
 def add_client(sender: socket):
     """Add a new client to the list if it doesn't already exist."""
     _port = sender.getsockname()[1]
-    for client in clients:
-        if client.getsockname()[1] == _port:
-            return
-    clients.append(sender)
-
-
-def ensureClient(s: socket):
-    return Message(addr=s.getpeername()[0], port=s.getpeername()[1], action=0)
+    with clients_lock:
+        for client in clients:
+            if client.getsockname()[1] == _port:
+                return
+        clients.append(sender)
 
 
 def i_am_alive(_, sender: socket):
-    # Broadcast the message to all connected clients
-
-    add_client(sender)
     cls = []
-    # response = list(map(ensureClient, clients))
     for c in clients:
         peer = c.getpeername()
         cls.append(client(peer[0], peer[1]))
 
     if len(cls) > 0:
         broadcast(cls, sender)
-    # sender.send("testing broadcast".encode())
 
 
 def broadcast(data, sender: socket):
@@ -48,7 +40,7 @@ def broadcast(data, sender: socket):
 
     json_string = json.dumps(data, cls=JSON)
 
-    print(json_string)
+    # print(json_string)
     for c in clients:
         if c.getpeername() != sender.getpeername():
             c.send("json.dumps(data.__dict__)".encode())
@@ -63,12 +55,17 @@ actions = {
 # Store a list of connected clients
 clients: List[socket] = []
 
+# Create a lock to synchronize access to the clients list
+clients_lock = threading.Lock()
+
 
 def handle_client(sender, client_address):
     """Manage communication with a single client."""
     print(f"New connection from {client_address}")
 
     # Add the client to the list of connected clients
+    with clients_lock:
+        clients.append(sender)
 
     while True:
         try:
@@ -82,14 +79,16 @@ def handle_client(sender, client_address):
 
             else:
                 # If no data is received, remove the client from the list of connected clients
-                clients.remove(sender)
+                with clients_lock:
+                    clients.remove(sender)
                 print(f"Connection closed with {client_address}")
                 sender.close()
                 break
         except Exception as e:
             print(f"Error: {e}")
-            if sender in clients:
-                clients.remove(sender)
+            with clients_lock:
+                if sender in clients:
+                    clients.remove(sender)
             sender.close()
             break
 
@@ -98,7 +97,7 @@ while True:
     # Wait for a new client to connect
     _client_socket, client_address = server_socket.accept()
 
-    # Create a new thread to handle communication with the client
+    add_client(_client_socket)
     thread = threading.Thread(target=handle_client,
                               args=(_client_socket, client_address))
     thread.start()
