@@ -1,7 +1,8 @@
+from dataclasses import dataclass
 import json
 from socket import *
 import threading
-from message import I_AM_ALIVE_RESPONSE, Message
+from message import JSON, Message, client
 from typing import List
 
 BUFFER_SIZE = 1024
@@ -23,11 +24,36 @@ def add_client(sender: socket):
     clients.append(sender)
 
 
-def i_am_alive(_, sender):
+def ensureClient(s: socket):
+    return Message(addr=s.getpeername()[0], port=s.getpeername()[1], action=0)
+
+
+def i_am_alive(_, sender: socket):
     # Broadcast the message to all connected clients
-    response = I_AM_ALIVE_RESPONSE(clients)
+
     add_client(sender)
-    broadcast(response, sender)
+    cls = []
+    # response = list(map(ensureClient, clients))
+    for c in clients:
+        peer = c.getpeername()
+        cls.append(client(peer[0], peer[1]))
+
+    if len(cls) > 0:
+        broadcast(cls, sender)
+    # sender.send("testing broadcast".encode())
+
+
+def broadcast(data, sender: socket):
+    """Send a message to all connected clients except the sender."""
+
+    json_string = json.dumps(data, cls=JSON)
+
+    print(json_string)
+    for c in clients:
+        if c.getpeername() != sender.getpeername():
+            c.send("json.dumps(data.__dict__)".encode())
+            c.send(json_string.encode())
+    print(data)
 
 
 actions = {
@@ -36,14 +62,6 @@ actions = {
 
 # Store a list of connected clients
 clients: List[socket] = []
-
-
-def broadcast(data, sender):
-    """Send a message to all connected clients except the sender."""
-    for client in clients:
-        if client != sender:
-            client.send(data)
-    print(data)
 
 
 def handle_client(sender, client_address):
