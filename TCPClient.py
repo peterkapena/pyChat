@@ -1,8 +1,10 @@
+from datetime import datetime
 import tkinter as tk
 from tkinter import StringVar, simpledialog
 from threading import *
 from socket import *
 import time
+from chat_log import ChatLog
 from message import Message, MessageActions
 import json
 
@@ -14,20 +16,19 @@ class ChatApp:
         self.master.title("Chat App")
         self.master.geometry("800x600")
         self.master.resizable(False, False)
-
-        # Ask for the username and set the window title
-        self.username = StringVar()
-
-        self.username.set(simpledialog.askstring(
-            "Username", "Enter your username:"))
+        self.username = simpledialog.askstring(
+            "Username", "Enter your username:")
 
         if self.username:
-            self.master.title(self.username.get())
+            self.master.title(self.username)
 
-        # Set up the left and right sections
-        self.left_frame = tk.Frame(self.master, bg="#1C413A")
-        self.left_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        self.set_left_frame()
+        self.set_right_frame()
+        self.set_chat_log()
 
+        # self.connect_to_server()
+
+    def set_right_frame(self):
         self.right_frame = tk.Frame(self.master, bg="#A6BDB9")
         self.right_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
@@ -37,19 +38,59 @@ class ChatApp:
         self.chatting_with_label.pack(side=tk.TOP, padx=10, pady=10)
 
         # Set up the input field and send button
-        self.input_field = tk.Entry(self.right_frame, font=("Arial", 14))
+
+        self.send_frame = tk.Frame(self.right_frame, bg="#A6BDB9")
+        self.send_frame.pack(side=tk.BOTTOM, fill=tk.BOTH, expand=True)
+
+        self.input_field = tk.Entry(self.send_frame, font=("Arial", 14))
         self.input_field.pack(side=tk.LEFT, padx=10,
-                              pady=10, fill=tk.BOTH, expand=True)
+                              pady=10, fill=tk.X, expand=True)
         self.input_field.bind("<Return>", self.send_message)
 
-        self.send_button = tk.Button(self.right_frame, text="Send", font=(
+        self.send_button = tk.Button(self.send_frame, text="Send", font=(
             "Arial", 14), command=self.send_message)
         self.send_button.pack(side=tk.LEFT, padx=10, pady=10)
 
-        self.connect_to_server()
+    def set_left_frame(self):
+        # Set up the left and right sections
+        self.left_frame = tk.Frame(self.master, bg="#1C413A")
+        self.left_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+        # Add the label for the online users
+        self.online_users_label = tk.Label(
+            self.left_frame, text="Online users", font=("Arial", 14), bg="#1C413A", fg="white")
+        self.online_users_label.pack(side=tk.TOP, padx=10, pady=10)
+
+        # Add the dummy users
+        self.user1_label = tk.Label(
+            self.left_frame, text="192.168.0.1 - John Doe", font=("Arial", 12), bg="#1C413A", fg="white")
+        self.user1_label.pack(side=tk.TOP, padx=10, pady=5)
+
+        self.user2_label = tk.Label(
+            self.left_frame, text="192.168.0.2 - Jane Smith", font=("Arial", 12), bg="#1C413A", fg="white")
+        self.user2_label.pack(side=tk.TOP, padx=10, pady=5)
+
+        self.user3_label = tk.Label(
+            self.left_frame, text="192.168.0.3 - Bob Johnson", font=("Arial", 12), bg="#1C413A", fg="white")
+        self.user3_label.pack(side=tk.TOP, padx=10, pady=5)
+
+    def set_chat_log(self):
+        chat_log = ChatLog(self.right_frame)
+        chat_log.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+
+        # add sample messages
+        chat_log.messages = []
+        for i in range(20):
+            message = {
+                "text": f"Message {i}",
+                "sender": "Me" if i % 2 == 0 else "You",
+                "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            }
+            chat_log.messages.append(message)
+            chat_log.add_message(message)
 
     def send_message(self, event=None):
-        self.send_i_am_alive_message()
+        # self.send_i_am_alive_message()
         message = self.input_field.get()
         if message:
             print(message)  # Replace with your code to send the message
@@ -62,7 +103,7 @@ class ChatApp:
         self.client_socket = socket(AF_INET, SOCK_STREAM)
         self.client_socket.connect(self.server_address)
         self.master.title(
-            f"{self.username.get()} - {self.client_socket.getsockname()}")
+            f"{self.username} - {self.client_socket.getsockname()}")
         self.send_i_am_alive_message()
         Thread(target=self.receive_messages).start()
 

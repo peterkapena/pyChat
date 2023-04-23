@@ -1,20 +1,23 @@
-# import json
-# from typing import List
-# from dataclasses import dataclass
+import tkinter as tk
+from datetime import datetime
 
-# @dataclass
-# class client:
-#     addr: str
-#     port: int
+from chat_log import ChatLog
 
-# class JSON(json.JSONEncoder):
-#     def default(self, obj):
-#         if isinstance(obj, client):
-#             return obj.__dict__
-#         return super().default(obj)
+root = tk.Tk()
+root.geometry("400x400")
 
-# clients = [client("192.168.0.1", 8000), client("192.168.0.2", 8000), client("192.168.0.3", 8000)]
+chat_log = ChatLog(root)
+chat_log.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
-# json_string = json.dumps(clients, cls=JSON)
+# add sample messages
+chat_log.messages = []
+for i in range(20):
+    message = {
+        "text": f"Message {i}",
+        "sender": "Me" if i % 2 == 0 else "You",
+        "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    }
+    chat_log.messages.append(message)
+    chat_log.add_message(message)
 
-# print(json_string)
+root.mainloop()
