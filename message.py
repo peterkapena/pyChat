@@ -1,5 +1,7 @@
 from dataclasses import dataclass
 from enum import Enum
+from socket import *
+from typing import List
 
 class MessageActions(Enum):
     I_AM_ALIVE = 1
@@ -10,3 +12,9 @@ class MessageActions(Enum):
 class Message:
     action: int
     body: str
+
+@dataclass
+class I_AM_ALIVE_RESPONSE:
+    clients: List[socket]    
+     
+
