@@ -71,13 +71,13 @@ class ChatApp:
         message = Message(action=action, body="")
         json_data = json.dumps(message.__dict__)
         self.client_socket.send(json_data.encode())
-        # self.master.after(5000, self.send_i_am_alive_message)
+        self.master.after(5000, self.send_i_am_alive_message)
 
     def receive_messages(self):
         while True:
             try:
                 message = self.client_socket.recv(1024).decode()
-                # print(message)
+                print(message)
                 # self.chat_log.config(state=tk.NORMAL)
                 # self.chat_log.insert(tk.END, message + "\n")
                 # self.chat_log.config(state=tk.DISABLED)

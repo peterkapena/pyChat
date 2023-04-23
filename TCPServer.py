@@ -17,11 +17,9 @@ print('The server is ready to receive')
 
 def add_client(sender: socket):
     """Add a new client to the list if it doesn't already exist."""
-    _port = sender.getsockname()[1]
     with clients_lock:
-        for client in clients:
-            if client.getsockname()[1] == _port:
-                return
+        if sender in clients:
+            return
         clients.append(sender)
 
 
@@ -63,9 +61,7 @@ def handle_client(sender, client_address):
     """Manage communication with a single client."""
     print(f"New connection from {client_address}")
 
-    # Add the client to the list of connected clients
-    with clients_lock:
-        clients.append(sender)
+    add_client(sender)
 
     while True:
         try:
