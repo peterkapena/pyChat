@@ -12,7 +12,7 @@ class ChatLog(tk.Frame):
 
         self.canvas = tk.Canvas(
             self, bg="white", width=self.winfo_reqwidth(), highlightthickness=0)
-        self.canvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+        self.canvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True,)
 
         self.message_frame = tk.Frame(self.canvas)
         self.canvas.create_window(
@@ -25,14 +25,14 @@ class ChatLog(tk.Frame):
         # bind mouse wheel events to scroll the canvas
         self.canvas.bind("<Configure>", lambda e: self.canvas.configure(
             scrollregion=self.canvas.bbox("all")))
-        
+
         self.canvas.bind("<MouseWheel>", lambda e: self.canvas.yview_scroll(
             int(-1 * (e.delta / 120)), "units"))
         self.bind("<MouseWheel>", lambda e: self.canvas.yview_scroll(
             int(-1 * (e.delta / 120)), "units"))
         master.bind("<MouseWheel>", lambda e: self.canvas.yview_scroll(
                     int(-1 * (e.delta / 120)), "units"))
-        
+
         # resize the canvas when the parent container is resized
         self.bind("<Configure>", lambda e: self.canvas.config(width=e.width))
 
@@ -67,10 +67,17 @@ class ChatLog(tk.Frame):
         message_frame.bind("<MouseWheel>", lambda e: self.canvas.yview_scroll(
             int(-1 * (e.delta / 120)), "units"))
 
-        message_frame.pack(fill=tk.X, padx=5, pady=5)
+        message_frame.pack(fill=tk.X, padx=5, pady=10)
         message_frame.update_idletasks()
 
         self.canvas.config(scrollregion=self.canvas.bbox("all"))
+        self.auto_scroll()
+
+    def auto_scroll(self):
+        self.canvas.yview_moveto(1)
+        tk.Frame(self.message_frame,)
+        tk.Frame(self.message_frame,)
+
 
     def load_messages(self, messages):
         for message in messages:

@@ -75,23 +75,27 @@ class ChatApp:
         self.user3_label.pack(side=tk.TOP, padx=10, pady=5)
 
     def set_chat_log(self):
-        chat_log = ChatLog(self.right_frame)
-        chat_log.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+        self.chat_log = ChatLog(self.right_frame)
+        self.chat_log.pack(side=tk.BOTTOM, fill=tk.BOTH, expand=True)
 
-        # add sample messages
-        chat_log.messages = []
         for i in range(20):
             message = {
                 "text": f"Message {i}",
                 "sender": "Me" if i % 2 == 0 else "You",
                 "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             }
-            chat_log.messages.append(message)
-            chat_log.add_message(message)
+            self.chat_log.add_message(message)
 
     def send_message(self, event=None):
         # self.send_i_am_alive_message()
+        message = {
+                "text": f"Message {1}",
+                "sender": "Me" if 1 % 2 == 0 else "You",
+                "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            }
+        self.chat_log.add_message(message)
         message = self.input_field.get()
+    
         if message:
             print(message)  # Replace with your code to send the message
 
