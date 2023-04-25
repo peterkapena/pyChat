@@ -11,21 +11,25 @@ class MessageActions(Enum):
 
 
 @dataclass
-class Message:
-    action: int
-    body: str = ""
-    addr: str = ""
-    port: int = 0
-
-
-@dataclass
 class client:
     addr: str
     port: int
 
 
+@dataclass
+class Message:
+    action: int
+    source: client = None
+    body: str = ""
+
+
+@dataclass
+class I_am_alive:
+    clients: List[client]
+
+
 class JSON(json.JSONEncoder):
     def default(self, obj):
-        if isinstance(obj, client):
+        if isinstance(obj, object):
             return obj.__dict__
         return super().default(obj)

@@ -2,7 +2,7 @@ from dataclasses import dataclass
 import json
 from socket import *
 import threading
-from message import JSON, Message, client
+from message import JSON, I_am_alive, Message, MessageActions, client
 from typing import List
 
 BUFFER_SIZE = 1024
@@ -23,31 +23,33 @@ def add_client(sender: socket):
         clients.append(sender)
 
 
-def i_am_alive(_, sender: socket):
+def i_am_alive_request_handler(_, sender: socket):
     cls = []
     for c in clients:
         peer = c.getpeername()
         cls.append(client(peer[0], peer[1]))
 
-    if len(cls) > 0:
-        broadcast(cls, sender)
+    if len(cls) > 1:
+        broadcast(I_am_alive(cls), sender, MessageActions.I_AM_ALIVE)
 
 
-def broadcast(data, sender: socket):
+def broadcast(data, sender: socket, action: MessageActions):
     """Send a message to all connected clients except the sender."""
 
     json_string = json.dumps(data, cls=JSON)
 
-    # print(json_string)
+    peer = sender.getpeername()
+    message = Message(action=action.value, source=client(
+        peer[0], peer[1]), body=json_string)
+
     for c in clients:
         if c.getpeername() != sender.getpeername():
-            c.send("json.dumps(data.__dict__)".encode())
-            c.send(json_string.encode())
+            c.send(json.dumps(message, cls=JSON).encode())
     print(data)
 
 
 actions = {
-    1: i_am_alive,
+    1: i_am_alive_request_handler,
 }
 
 # Store a list of connected clients
@@ -57,7 +59,7 @@ clients: List[socket] = []
 clients_lock = threading.Lock()
 
 
-def handle_client(sender, client_address):
+def handle_client_requests(sender, client_address):
     """Manage communication with a single client."""
     print(f"New connection from {client_address}")
 
@@ -94,6 +96,6 @@ while True:
     _client_socket, client_address = server_socket.accept()
 
     add_client(_client_socket)
-    thread = threading.Thread(target=handle_client,
+    thread = threading.Thread(target=handle_client_requests,
                               args=(_client_socket, client_address))
     thread.start()

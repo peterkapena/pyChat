@@ -26,7 +26,7 @@ class ChatApp:
         self.set_right_frame()
         self.set_chat_log()
 
-        # self.connect_to_server()
+        self.connect_to_server()
 
     def set_right_frame(self):
         self.right_frame = tk.Frame(self.master, bg="#A6BDB9")
@@ -89,13 +89,13 @@ class ChatApp:
     def send_message(self, event=None):
         # self.send_i_am_alive_message()
         message = {
-                "text": f"Message {1}",
-                "sender": "Me" if 1 % 2 == 0 else "You",
-                "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            }
+            "text": f"Message {1}",
+            "sender": "Me" if 1 % 2 == 0 else "You",
+            "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        }
         self.chat_log.add_message(message)
         message = self.input_field.get()
-    
+
         if message:
             print(message)  # Replace with your code to send the message
 
@@ -109,7 +109,7 @@ class ChatApp:
         self.master.title(
             f"{self.username} - {self.client_socket.getsockname()}")
         self.send_i_am_alive_message()
-        Thread(target=self.receive_messages).start()
+        Thread(target=self.handle_response).start()
 
     def send_i_am_alive_message(self):
         action = MessageActions.I_AM_ALIVE.value
@@ -118,11 +118,23 @@ class ChatApp:
         self.client_socket.send(json_data.encode())
         self.master.after(5000, self.send_i_am_alive_message)
 
-    def receive_messages(self):
+    def i_am_alive_response_handler(self):
+        0
+
+    response_actions = {
+        1: i_am_alive_response_handler,
+    }
+
+    def handle_response(self):
         while True:
             try:
-                message = self.client_socket.recv(1024).decode()
-                print(message)
+                response = self.client_socket.recv(1024).decode()
+                json_data = json.loads(response)
+                response = Message(**json_data)
+                print(response)
+                # if response:
+                #     self.response_actions.get(response.action)(response.body, sender)
+                # response = Message(**json_data)
                 # self.chat_log.config(state=tk.NORMAL)
                 # self.chat_log.insert(tk.END, message + "\n")
                 # self.chat_log.config(state=tk.DISABLED)
