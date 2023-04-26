@@ -14,6 +14,11 @@ class MessageActions(Enum):
 class client:
     addr: str
     port: int
+    isonLine: bool = False
+
+    def __init__(self, addr: str, port: int):
+        self.addr = addr
+        self.port = port
 
 
 @dataclass
@@ -26,6 +31,10 @@ class Message:
 # @dataclass
 # class I_am_alive:
 #     clients: List[client]
+
+# class user:
+#     isOnline: bool
+#     client: client
 
 
 class JSON(json.JSONEncoder):

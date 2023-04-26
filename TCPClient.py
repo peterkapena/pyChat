@@ -5,7 +5,7 @@ from threading import *
 from socket import *
 import time
 from chat_log import ChatLog
-from message import JSON, Message, MessageActions, client
+from message import Message, MessageActions, client
 import json
 from typing import List
 
@@ -17,12 +17,14 @@ class ChatApp:
         self.master.title("Chat App")
         self.master.geometry("800x600")
         self.master.resizable(False, False)
-        self.username = simpledialog.askstring(
-            "Username", "Enter your username:")
+        self.username = ""
+        # simpledialog.askstring(
+        #     "Username", "Enter your username:")
 
         if self.username:
             self.master.title(self.username)
 
+        self.users: List[client] = []
         self.set_left_frame()
         self.set_right_frame()
         self.set_chat_log()
@@ -61,6 +63,9 @@ class ChatApp:
         self.online_users_label = tk.Label(
             self.left_frame, text="Online users", font=("Arial", 14), bg="#1C413A", fg="white")
         self.online_users_label.pack(side=tk.TOP, padx=10, pady=10)
+
+        self.online_users_frame = tk.Frame(self.left_frame, bg="#1C413A")
+        self.online_users_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
         # Add the dummy users
         # self.user1_label = tk.Label(
@@ -117,19 +122,31 @@ class ChatApp:
         message = Message(action=action)
         json_data = json.dumps(message.__dict__)
         self.client_socket.send(json_data.encode())
-        self.master.after(5000, self.send_i_am_alive_message)
+        self.master.after(7000, self.send_i_am_alive_message)
+
+    def render_online_user(self):
+        for child in self.online_users_frame.winfo_children():
+            child.destroy()
+
+        for c in self.users:
+            user_label = tk.Label(
+                self.online_users_frame, text=f"{c.addr} - {c.port}", font=("Arial", 12), bg="#1C413A", fg="white")
+            user_label.pack(side=tk.TOP, padx=10, pady=5)
 
     def i_am_alive_response_handler(self, body, source: client):
-        clients = json.loads(body, cls=JSON)
+
+        clients: List[client] = json.loads(
+            body, object_hook=lambda d: client(**d))
+
+        print(source)
         for c in clients:
-            # cc: client = json.loads(c)
-            print(c)
-        #     # if source.addr == c.addr and source.port == c.port:
-        #     #     continue
-        #     user_label = tk.Label(
-        #         self.left_frame, text=f"{c.addr} - {c.port}", font=("Arial", 12), bg="#1C413A", fg="white")
-        #     user_label.pack(side=tk.TOP, padx=10, pady=5)
-        # print(clients)
+            # if the client equals the source client or it is already in the list of users, skip it
+            if (self.client_socket.getsockname()[0] == c.addr and self.client_socket.getsockname()[1] == c.port) or c in self.users:
+                continue
+            self.users.append(c)
+
+        if len(clients) != len(self.users):
+            self.render_online_user()
 
     response_actions = {
         1: i_am_alive_response_handler,
@@ -143,7 +160,7 @@ class ChatApp:
                 response = Message(**json_data)
                 if response:
                     self.response_actions.get(
-                        response.action)(self, response.body, response.source)
+                        response.action)(self, response.body, client(**response.source))
                 else:
                     3
 
