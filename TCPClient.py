@@ -1,6 +1,6 @@
 from datetime import datetime
 import tkinter as tk
-from tkinter import simpledialog
+from tkinter import StringVar, simpledialog
 from threading import *
 from socket import *
 import time
@@ -34,9 +34,12 @@ class ChatApp:
         self.right_frame = tk.Frame(self.master, bg="#A6BDB9")
         self.right_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
+        # self.current_chat_user = None
         # Set up the label for the current user being chatted to
+        # if self.current_chat_user:
+        self.chatting_with_str = StringVar()
         self.chatting_with_label = tk.Label(
-            self.right_frame, text="Chatting with:", font=("Arial", 14), bg="#A6BDB9")
+            self.right_frame, textvariable=self.chatting_with_str, font=("Arial", 14), bg="#A6BDB9")
         self.chatting_with_label.pack(side=tk.TOP, padx=10, pady=10)
 
         # Set up the input field and send button
@@ -65,19 +68,6 @@ class ChatApp:
 
         self.online_users_frame = tk.Frame(self.left_frame, bg="#1C413A")
         self.online_users_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-
-        # Add the dummy users
-        # self.user1_label = tk.Label(
-        #     self.left_frame, text="192.168.0.1 - John Doe", font=("Arial", 12), bg="#1C413A", fg="white")
-        # self.user1_label.pack(side=tk.TOP, padx=10, pady=5)
-
-        # self.user2_label = tk.Label(
-        #     self.left_frame, text="192.168.0.2 - Jane Smith", font=("Arial", 12), bg="#1C413A", fg="white")
-        # self.user2_label.pack(side=tk.TOP, padx=10, pady=5)
-
-        # self.user3_label = tk.Label(
-        #     self.left_frame, text="192.168.0.3 - Bob Johnson", font=("Arial", 12), bg="#1C413A", fg="white")
-        # self.user3_label.pack(side=tk.TOP, padx=10, pady=5)
 
     def set_chat_log(self):
         self.chat_log = ChatLog(self.right_frame)
@@ -123,14 +113,20 @@ class ChatApp:
         self.client_socket.send(json_data.encode())
         self.master.after(7000, self.send_i_am_alive_message)
 
+    def set_current_chat_user(self, user: client):
+        self.current_chat_user = user
+        self.chatting_with_str.set(user.user_name)
+
     def render_online_user(self):
         for child in self.online_users_frame.winfo_children():
             child.destroy()
 
         for c in self.users:
-            user_label = tk.Label(
-                self.online_users_frame, text=f"{c.addr} - {c.port} - {c.user_name}", font=("Arial", 12), bg="#1C413A", fg="white")
-            user_label.pack(side=tk.TOP, padx=10, pady=5)
+            user_label = tk.Button(
+                self.online_users_frame, text=f"{c.addr} - {c.port} - {c.user_name}", font=("Arial", 12), bg="#05231e", fg="white")
+            user_label.pack(side=tk.TOP, padx=20, pady=20,)
+            user_label.bind(
+                "<Button-1>", lambda _: self.set_current_chat_user(c))
 
     def i_am_alive_response_handler(self, body, source: client):
 
