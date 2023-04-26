@@ -17,9 +17,8 @@ class ChatApp:
         self.master.title("Chat App")
         self.master.geometry("800x600")
         self.master.resizable(False, False)
-        self.username = ""
-        # simpledialog.askstring(
-        #     "Username", "Enter your username:")
+        self.username = simpledialog.askstring(
+            "Username", "Enter your username:")
 
         if self.username:
             self.master.title(self.username)
@@ -119,7 +118,7 @@ class ChatApp:
 
     def send_i_am_alive_message(self):
         action = MessageActions.I_AM_ALIVE.value
-        message = Message(action=action)
+        message = Message(action=action, user_name=self.username)
         json_data = json.dumps(message.__dict__)
         self.client_socket.send(json_data.encode())
         self.master.after(7000, self.send_i_am_alive_message)
@@ -130,7 +129,7 @@ class ChatApp:
 
         for c in self.users:
             user_label = tk.Label(
-                self.online_users_frame, text=f"{c.addr} - {c.port}", font=("Arial", 12), bg="#1C413A", fg="white")
+                self.online_users_frame, text=f"{c.addr} - {c.port} - {c.user_name}", font=("Arial", 12), bg="#1C413A", fg="white")
             user_label.pack(side=tk.TOP, padx=10, pady=5)
 
     def i_am_alive_response_handler(self, body, source: client):

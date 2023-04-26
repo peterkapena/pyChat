@@ -23,29 +23,30 @@ def add_client(sender: socket):
         clients.append(sender)
 
 
-def i_am_alive_request_handler(_, sender: socket):
+def i_am_alive_request_handler(request: Message, sender: socket):
     cls = []
     for c in clients:
         peer = c.getpeername()
-        cls.append(client(peer[0], peer[1]))
+        cls.append(client(peer[0], peer[1], request.user_name, True))
 
     if len(cls) > 1:
-        broadcast(cls, sender, MessageActions.I_AM_ALIVE)
+        broadcast(cls, sender, MessageActions.I_AM_ALIVE, request)
 
 
-def broadcast(data, sender: socket, action: MessageActions):
+def broadcast(data, sender: socket, action: MessageActions, request: Message):
     """Send a message to all connected clients except the sender."""
 
     json_string = json.dumps(data, cls=JSON)
 
     peer = sender.getpeername()
     message = Message(action=action.value, source=client(
-        peer[0], peer[1]), body=json_string)
+        peer[0], peer[1], request.user_name, True), body=json_string)
 
+    j = json.dumps(message, cls=JSON)
     for c in clients:
         if c.getpeername() != sender.getpeername():
-            c.send(json.dumps(message, cls=JSON).encode())
-    print(data)
+            c.send(j.encode())
+    print(j)
 
 
 actions = {
@@ -59,7 +60,7 @@ clients: List[socket] = []
 clients_lock = threading.Lock()
 
 
-def handle_client_requests(sender, client_address):
+def handle_client_requests(sender: socket, client_address):
     """Manage communication with a single client."""
     print(f"New connection from {client_address}")
 
@@ -87,7 +88,7 @@ def handle_client_requests(sender, client_address):
             with clients_lock:
                 if sender in clients:
                     clients.remove(sender)
-            sender.close()
+            # sender.close()
             break
 
 

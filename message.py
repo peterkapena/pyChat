@@ -14,11 +14,13 @@ class MessageActions(Enum):
 class client:
     addr: str
     port: int
+    user_name: str
     isonLine: bool = False
 
-    def __init__(self, addr: str, port: int):
-        self.addr = addr
-        self.port = port
+    # def __init__(self, addr: str, port: int, user_name: str):
+    #     self.addr = addr
+    #     self.port = port
+    #     self.user_name = user_name
 
 
 @dataclass
@@ -26,6 +28,7 @@ class Message:
     action: int
     source: client = None
     body: str = ""
+    user_name: str = ""
 
 
 # @dataclass
