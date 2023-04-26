@@ -23,9 +23,9 @@ class Message:
     body: str = ""
 
 
-@dataclass
-class I_am_alive:
-    clients: List[client]
+# @dataclass
+# class I_am_alive:
+#     clients: List[client]
 
 
 class JSON(json.JSONEncoder):

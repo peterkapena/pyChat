@@ -1,12 +1,13 @@
 from datetime import datetime
 import tkinter as tk
-from tkinter import StringVar, simpledialog
+from tkinter import simpledialog
 from threading import *
 from socket import *
 import time
 from chat_log import ChatLog
-from message import Message, MessageActions
+from message import JSON, Message, MessageActions, client
 import json
+from typing import List
 
 
 class ChatApp:
@@ -62,17 +63,17 @@ class ChatApp:
         self.online_users_label.pack(side=tk.TOP, padx=10, pady=10)
 
         # Add the dummy users
-        self.user1_label = tk.Label(
-            self.left_frame, text="192.168.0.1 - John Doe", font=("Arial", 12), bg="#1C413A", fg="white")
-        self.user1_label.pack(side=tk.TOP, padx=10, pady=5)
+        # self.user1_label = tk.Label(
+        #     self.left_frame, text="192.168.0.1 - John Doe", font=("Arial", 12), bg="#1C413A", fg="white")
+        # self.user1_label.pack(side=tk.TOP, padx=10, pady=5)
 
-        self.user2_label = tk.Label(
-            self.left_frame, text="192.168.0.2 - Jane Smith", font=("Arial", 12), bg="#1C413A", fg="white")
-        self.user2_label.pack(side=tk.TOP, padx=10, pady=5)
+        # self.user2_label = tk.Label(
+        #     self.left_frame, text="192.168.0.2 - Jane Smith", font=("Arial", 12), bg="#1C413A", fg="white")
+        # self.user2_label.pack(side=tk.TOP, padx=10, pady=5)
 
-        self.user3_label = tk.Label(
-            self.left_frame, text="192.168.0.3 - Bob Johnson", font=("Arial", 12), bg="#1C413A", fg="white")
-        self.user3_label.pack(side=tk.TOP, padx=10, pady=5)
+        # self.user3_label = tk.Label(
+        #     self.left_frame, text="192.168.0.3 - Bob Johnson", font=("Arial", 12), bg="#1C413A", fg="white")
+        # self.user3_label.pack(side=tk.TOP, padx=10, pady=5)
 
     def set_chat_log(self):
         self.chat_log = ChatLog(self.right_frame)
@@ -113,13 +114,22 @@ class ChatApp:
 
     def send_i_am_alive_message(self):
         action = MessageActions.I_AM_ALIVE.value
-        message = Message(action=action, body="")
+        message = Message(action=action)
         json_data = json.dumps(message.__dict__)
         self.client_socket.send(json_data.encode())
         self.master.after(5000, self.send_i_am_alive_message)
 
-    def i_am_alive_response_handler(self):
-        0
+    def i_am_alive_response_handler(self, body, source: client):
+        clients = json.loads(body, cls=JSON)
+        for c in clients:
+            # cc: client = json.loads(c)
+            print(c)
+        #     # if source.addr == c.addr and source.port == c.port:
+        #     #     continue
+        #     user_label = tk.Label(
+        #         self.left_frame, text=f"{c.addr} - {c.port}", font=("Arial", 12), bg="#1C413A", fg="white")
+        #     user_label.pack(side=tk.TOP, padx=10, pady=5)
+        # print(clients)
 
     response_actions = {
         1: i_am_alive_response_handler,
@@ -131,17 +141,15 @@ class ChatApp:
                 response = self.client_socket.recv(1024).decode()
                 json_data = json.loads(response)
                 response = Message(**json_data)
-                print(response)
-                # if response:
-                #     self.response_actions.get(response.action)(response.body, sender)
-                # response = Message(**json_data)
-                # self.chat_log.config(state=tk.NORMAL)
-                # self.chat_log.insert(tk.END, message + "\n")
-                # self.chat_log.config(state=tk.DISABLED)
-                # self.chat_log.see(tk.END)
-            except:
+                if response:
+                    self.response_actions.get(
+                        response.action)(self, response.body, response.source)
+                else:
+                    3
+
+            except Exception as e:
                 # If there's an error, assume the connection has been lost and close the client socket
-                self.client_socket.close()
+                print(f"Error: {e}")
 
 
 root = tk.Tk()

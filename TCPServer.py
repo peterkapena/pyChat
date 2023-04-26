@@ -2,7 +2,7 @@ from dataclasses import dataclass
 import json
 from socket import *
 import threading
-from message import JSON, I_am_alive, Message, MessageActions, client
+from message import JSON, Message, MessageActions, client
 from typing import List
 
 BUFFER_SIZE = 1024
@@ -30,7 +30,7 @@ def i_am_alive_request_handler(_, sender: socket):
         cls.append(client(peer[0], peer[1]))
 
     if len(cls) > 1:
-        broadcast(I_am_alive(cls), sender, MessageActions.I_AM_ALIVE)
+        broadcast(cls, sender, MessageActions.I_AM_ALIVE)
 
 
 def broadcast(data, sender: socket, action: MessageActions):
