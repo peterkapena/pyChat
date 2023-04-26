@@ -1,6 +1,8 @@
 import tkinter as tk
 from datetime import datetime
 
+from message import ME, chat_message
+
 
 class ChatLog(tk.Frame):
     def __init__(self, master, *args, **kwargs):
@@ -36,31 +38,31 @@ class ChatLog(tk.Frame):
         # resize the canvas when the parent container is resized
         self.bind("<Configure>", lambda e: self.canvas.config(width=e.width))
 
-    def add_message(self, message):
-        bg_color = "lightblue" if message["sender"] == "Me" else "white"
+    def add_message(self, message: chat_message):
+        bg_color = "lightblue" if message._from == ME else "white"
 
         message_frame = tk.Frame(self.message_frame, bg=bg_color)
-        sender_label = tk.Label(message_frame, text=message["sender"], font=(
-            "Arial", 8, "bold"), fg="gray", bg=bg_color)
-        text_label = tk.Label(message_frame, text=message["text"], font=(
+        # sender_label = tk.Label(message_frame, text=message.sender.user_name, font=(
+        #     "Arial", 8, "bold"), fg="gray", bg=bg_color)
+        text_label = tk.Label(message_frame, text=message.text, font=(
             "Arial", 10), wraplength=300, justify="left", fg="black", bg=bg_color)
-        time_label = tk.Label(message_frame, text=message["time"], font=(
+        time_label = tk.Label(message_frame, text=message.time.strftime("%Y-%m-%d %H:%M:%S"), font=(
             "Arial", 8), fg="gray", bg=bg_color)
 
-        if message["sender"] == "Me":
+        if message._from == ME:
             message_frame.grid_columnconfigure(0, weight=1)
             text_label.grid(row=0, column=0, padx=(
                 0, 5), pady=(5, 0), sticky="e")
-            sender_label.grid(row=1, column=0, padx=(0, 5),
-                              pady=(0, 5), sticky="e")
+            # sender_label.grid(row=1, column=0, padx=(0, 5),
+            #                   pady=(0, 5), sticky="e")
             time_label.grid(row=2, column=0, padx=(
                 0, 5), pady=(0, 5), sticky="e")
         else:
             message_frame.grid_columnconfigure(0, weight=1)
             text_label.grid(row=0, column=0, padx=(
                 5, 0), pady=(5, 0), sticky="w")
-            sender_label.grid(row=1, column=0, padx=(5, 0),
-                              pady=(0, 5), sticky="w")
+            # sender_label.grid(row=1, column=0, padx=(5, 0),
+            #                   pady=(0, 5), sticky="w")
             time_label.grid(row=2, column=0, padx=(
                 5, 0), pady=(0, 5), sticky="w")
 
@@ -77,7 +79,6 @@ class ChatLog(tk.Frame):
         self.canvas.yview_moveto(1)
         tk.Frame(self.message_frame,)
         tk.Frame(self.message_frame,)
-
 
     def load_messages(self, messages):
         for message in messages:

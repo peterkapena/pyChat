@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from datetime import datetime
 from enum import Enum
 from socket import *
 from typing import List
@@ -45,3 +46,15 @@ class JSON(json.JSONEncoder):
         if isinstance(obj, object):
             return obj.__dict__
         return super().default(obj)
+
+
+NOT_ME = 1
+ME = 2
+
+
+@dataclass
+class chat_message:
+    text: str
+    sender: client
+    time: datetime
+    _from: int

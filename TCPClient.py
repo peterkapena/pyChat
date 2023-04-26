@@ -5,7 +5,7 @@ from threading import *
 from socket import *
 import time
 from chat_log import ChatLog
-from message import Message, MessageActions, client
+from message import ME, NOT_ME, Message, MessageActions, chat_message, client
 import json
 from typing import List
 
@@ -26,7 +26,7 @@ class ChatApp:
         self.users: List[client] = []
         self.set_left_frame()
         self.set_right_frame()
-        self.set_chat_log()
+        # self.set_chat_log()
 
         self.connect_to_server()
 
@@ -74,11 +74,14 @@ class ChatApp:
         self.chat_log.pack(side=tk.BOTTOM, fill=tk.BOTH, expand=True)
 
         for i in range(20):
-            message = {
-                "text": f"Message {i}",
-                "sender": "Me" if i % 2 == 0 else "You",
-                "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            }
+            message: chat_message = chat_message(
+                f"Message {i}", None, datetime.now(), ME if i % 2 == 0 else NOT_ME)
+
+            # {
+            #     "text": f"Message {i}",
+            #     "sender": "Me" if i % 2 == 0 else "You",
+            #     "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            # }
             self.chat_log.add_message(message)
 
     def send_message(self, event=None):
@@ -114,8 +117,10 @@ class ChatApp:
         self.master.after(7000, self.send_i_am_alive_message)
 
     def set_current_chat_user(self, user: client):
+        print(user.port)
         self.current_chat_user = user
-        self.chatting_with_str.set(user.user_name)
+        self.chatting_with_str.set(
+            f"Chatting with: {user.addr} - {user.port} - {user.user_name}")
 
     def render_online_user(self):
         for child in self.online_users_frame.winfo_children():
@@ -124,7 +129,7 @@ class ChatApp:
         for c in self.users:
             user_label = tk.Button(
                 self.online_users_frame, text=f"{c.addr} - {c.port} - {c.user_name}", font=("Arial", 12), bg="#05231e", fg="white")
-            user_label.pack(side=tk.TOP, padx=20, pady=20,)
+            user_label.pack(side=tk.TOP, padx=10, pady=10,)
             user_label.bind(
                 "<Button-1>", lambda _: self.set_current_chat_user(c))
 
