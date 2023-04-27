@@ -5,7 +5,7 @@ from threading import *
 from socket import *
 import time
 from chat_log import ChatLog
-from message import ME, NOT_ME, Message, MessageActions, chat_message, client
+from message import DEFAULT_DATE_TIME_FORMAT, JSON, ME, NOT_ME, UNKNOWN, Message, MessageActions, chat_message, client
 import json
 from typing import List
 
@@ -26,6 +26,8 @@ class ChatApp:
         self.users: List[client] = []
         self.set_left_frame()
         self.set_right_frame()
+        self.chat_log = ChatLog(self.right_frame)
+        self.chat_log.pack(side=tk.BOTTOM, fill=tk.BOTH, expand=True)
         # self.set_chat_log()
 
         self.connect_to_server()
@@ -69,36 +71,38 @@ class ChatApp:
         self.online_users_frame = tk.Frame(self.left_frame, bg="#1C413A")
         self.online_users_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
-    def set_chat_log(self):
-        self.chat_log = ChatLog(self.right_frame)
-        self.chat_log.pack(side=tk.BOTTOM, fill=tk.BOTH, expand=True)
+    def set_chat_log(self, sender: client):
+        logs = list(filter(lambda c: c.dest == sender, self.chats))
+        for m in logs:
+            self.chat_log.add_message(m)
 
-        for i in range(20):
-            message: chat_message = chat_message(
-                f"Message {i}", None, datetime.now(), ME if i % 2 == 0 else NOT_ME)
+    def get_client(self) -> client:
+        return client(
+            self.client_socket.getsockname[0], self.client_socket.getsockname[1], self.username, True)
 
-            # {
-            #     "text": f"Message {i}",
-            #     "sender": "Me" if i % 2 == 0 else "You",
-            #     "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            # }
-            self.chat_log.add_message(message)
+    def send_message(self, _=None):
+        self.chats: List[chat_message] = []
+        addr = self.client_socket.getsockname()[0]
+        port = self.client_socket.getsockname()[1]
+        un = self.username
+        # u = self.current_chat_user
+        sender = client(addr, port, un, True)
+        t = self.input_field.get()
+        when = datetime.utcnow().strftime(DEFAULT_DATE_TIME_FORMAT)
 
-    def send_message(self, event=None):
-        # self.send_i_am_alive_message()
-        message = {
-            "text": f"Message {1}",
-            "sender": "Me" if 1 % 2 == 0 else "You",
-            "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        }
-        self.chat_log.add_message(message)
-        message = self.input_field.get()
+        # replace sender by u
+        chat: chat_message = chat_message(t, sender, sender, when, UNKNOWN)
 
-        if message:
-            print(message)  # Replace with your code to send the message
+        json_string = json.dumps(chat, cls=JSON)
+        action = MessageActions.SENDING_MESSAGE.value
+        message = Message(action, sender, json_string, un, sender)
+        json_data = json.dumps(message, cls=JSON)
+        print(json_data)
+        # self.client_socket.send()
 
-            # Clear the input field
-            self.input_field.delete(0, tk.END)
+        self.chats.append(chat)
+        self.set_chat_log(sender)
+        self.input_field.delete(0, tk.END)
 
     def connect_to_server(self):
         self.server_address = ('localhost', 12000)
@@ -114,7 +118,7 @@ class ChatApp:
         message = Message(action=action, user_name=self.username)
         json_data = json.dumps(message.__dict__)
         self.client_socket.send(json_data.encode())
-        self.master.after(7000, self.send_i_am_alive_message)
+        self.master.after(10000, self.send_i_am_alive_message)
 
     def set_current_chat_user(self, user: client):
         print(user.port)

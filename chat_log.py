@@ -46,7 +46,7 @@ class ChatLog(tk.Frame):
         #     "Arial", 8, "bold"), fg="gray", bg=bg_color)
         text_label = tk.Label(message_frame, text=message.text, font=(
             "Arial", 10), wraplength=300, justify="left", fg="black", bg=bg_color)
-        time_label = tk.Label(message_frame, text=message.time.strftime("%Y-%m-%d %H:%M:%S"), font=(
+        time_label = tk.Label(message_frame, text=message.when, font=(
             "Arial", 8), fg="gray", bg=bg_color)
 
         if message._from == ME:

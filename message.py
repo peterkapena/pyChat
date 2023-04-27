@@ -30,6 +30,7 @@ class Message:
     source: client = None
     body: str = ""
     user_name: str = ""
+    dest: client = None
 
 
 # @dataclass
@@ -50,11 +51,14 @@ class JSON(json.JSONEncoder):
 
 NOT_ME = 1
 ME = 2
+UNKNOWN = 3
+DEFAULT_DATE_TIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 
 
 @dataclass
 class chat_message:
     text: str
     sender: client
-    time: datetime
+    dest: client
+    when: str
     _from: int
