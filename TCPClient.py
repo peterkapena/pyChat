@@ -97,8 +97,8 @@ class ChatApp:
         action = MessageActions.SENDING_MESSAGE.value
         message = Message(action, sender, json_string, un, sender)
         json_data = json.dumps(message, cls=JSON)
-        print(json_data)
-        # self.client_socket.send()
+        # print(json_data)
+        self.client_socket.send(json_data.encode())
 
         self.chats.append(chat)
         self.set_chat_log(sender)
@@ -137,7 +137,7 @@ class ChatApp:
             user_label.bind(
                 "<Button-1>", lambda _: self.set_current_chat_user(c))
 
-    def i_am_alive_response_handler(self, body, source: client):
+    def i_am_alive_response_handler(self, body: str, source: client):
 
         clients: List[client] = json.loads(
             body, object_hook=lambda d: client(**d))
@@ -152,8 +152,13 @@ class ChatApp:
         if len(clients) != len(self.users):
             self.render_online_user()
 
+    def incoming_chat_handler(self, body: str, source: client):
+        chat = json.loads(body, object_hook=lambda d: chat_message(**d))
+        print(chat)
+
     response_actions = {
         1: i_am_alive_response_handler,
+        2: incoming_chat_handler,
     }
 
     def handle_response(self):

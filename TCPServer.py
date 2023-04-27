@@ -33,6 +33,13 @@ def i_am_alive_request_handler(request: Message, sender: socket):
         broadcast(cls, sender, MessageActions.I_AM_ALIVE, request)
 
 
+def forward_chat(request: Message, sender: socket):
+    dest_socket = next((c for c in clients if c == sender), None)
+    if dest_socket:
+        json_data = json.dumps(request, cls=JSON)
+        dest_socket.send(json_data.encode())
+
+
 def broadcast(data, sender: socket, action: MessageActions, request: Message):
     """Send a message to all connected clients except the sender."""
 
@@ -46,11 +53,11 @@ def broadcast(data, sender: socket, action: MessageActions, request: Message):
     for c in clients:
         if c.getpeername() != sender.getpeername():
             c.send(j.encode())
-    print(j)
 
 
 actions = {
     1: i_am_alive_request_handler,
+    2: forward_chat,
 }
 
 # Store a list of connected clients
