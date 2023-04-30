@@ -23,20 +23,25 @@ def add_client(sender: socket):
 
 
 def i_am_alive_request_handler(request: Message, sender: socket):
-    cls = []
-    for c in clients:
-        peer = c.getpeername()
-        cls.append(client(peer[0], peer[1], request.user_name, True))
+    with clients_lock:
+        cls = []
+        for c in clients:
+            peer = c.getpeername()
+            cls.append(client(peer[0], peer[1], request.user_name, True))
 
-    if len(cls) > 1:
-        broadcast(cls, sender, MessageActions.I_AM_ALIVE, request)
+        if len(cls) > 1:
+            broadcast(cls, sender, MessageActions.I_AM_ALIVE, request)
 
 
 def forward_chat(request: Message, sender: socket):
-    dest_socket = next((c for c in clients if c == sender), None)
-    if dest_socket:
-        json_data = json.dumps(request, cls=JSON)
-        dest_socket.send(json_data.encode())
+    with clients_lock:
+        dest_client = client(**request.dest)
+        dest_socket = next((c for c in clients if c.getpeername()[0] == dest_client.addr
+                            and c.getpeername()[1] == dest_client.port),
+                           None)
+        if dest_socket:
+            json_data = json.dumps(request, cls=JSON)
+            dest_socket.send(json_data.encode())
 
 
 def broadcast(data, sender: socket, action: MessageActions, request: Message):
@@ -57,6 +62,8 @@ def broadcast(data, sender: socket, action: MessageActions, request: Message):
 actions = {
     1: i_am_alive_request_handler,
     2: forward_chat,
+
+
 }
 
 # Store a list of connected clients

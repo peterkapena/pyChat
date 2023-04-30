@@ -30,6 +30,8 @@ class ChatApp:
         self.chat_log.pack(side=tk.BOTTOM, fill=tk.BOTH, expand=True)
         # self.set_chat_log()
 
+        self.chats: List[chat_message] = []
+
         self.connect_to_server()
 
     def set_right_frame(self):
@@ -72,26 +74,25 @@ class ChatApp:
         self.online_users_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
     def set_chat_log(self, sender: client):
-        logs = list(filter(lambda c: c.dest == sender, self.chats))
+        logs = list(filter(lambda c: c.sender.addr == sender.addr
+                           and c.sender.port == sender.port, self.chats))
         for m in logs:
             self.chat_log.add_message(m)
 
     def send_message(self, _=None):
-        self.chats: List[chat_message] = []
         addr = self.client_socket.getsockname()[0]
         port = self.client_socket.getsockname()[1]
         un = self.username
-        # u = self.current_chat_user
+        u = self.current_chat_user
         sender = client(addr, port, un, True)
         t = self.input_field.get()
         when = datetime.utcnow().strftime(DEFAULT_DATE_TIME_FORMAT)
 
-        # replace sender by u
-        chat: chat_message = chat_message(t, sender, sender, when, UNKNOWN)
+        chat: chat_message = chat_message(t, sender, u, when, ME)
 
         json_string = json.dumps(chat, cls=JSON)
         action = MessageActions.SENDING_MESSAGE.value
-        message = Message(action, sender, json_string, un, sender)
+        message = Message(action, sender, json_string, un, u)
         json_data = json.dumps(message, cls=JSON)
         # print(json_data)
         self.client_socket.send(json_data.encode())
@@ -155,10 +156,12 @@ class ChatApp:
             sender=client(**data_dict['sender']),
             dest=client(**data_dict['dest']),
             when=data_dict['when'],
-            _from=data_dict['_from']
+            _from=NOT_ME
         )
 
-        print(chat_msg)
+        self.chats.append(chat_msg)
+        self.set_chat_log(chat_msg.sender)
+        # print(chat_msg)
 
     response_actions = {
         1: i_am_alive_response_handler,
