@@ -1,23 +1,34 @@
-import tkinter as tk
-from datetime import datetime
+import json
+from dataclasses import dataclass
 
-from chat_log import ChatLog
 
-root = tk.Tk()
-root.geometry("400x400")
+@dataclass
+class client:
+    addr: str
+    port: int
+    user_name: str
+    isonLine: bool
 
-chat_log = ChatLog(root)
-chat_log.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
-# add sample messages
-chat_log.messages = []
-for i in range(20):
-    message = {
-        "text": f"Message {i}",
-        "sender": "Me" if i % 2 == 0 else "You",
-        "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    }
-    chat_log.messages.append(message)
-    chat_log.add_message(message)
+@dataclass
+class chat_message:
+    text: str
+    sender: client
+    dest: client
+    when: str
+    _from: int
 
-root.mainloop()
+
+json_str = '{ "text": "aa", "sender": { "addr": "127.0.0.1", "port": 63904, "user_name": "aa", "isonLine": true }, "dest": { "addr": "127.0.0.1", "port": 63904, "user_name": "aa", "isonLine": true }, "when": "2023-04-30 06:29:52", "_from": 3 }'
+
+data_dict = json.loads(json_str)
+
+chat_msg = chat_message(
+    text=data_dict['text'],
+    sender=client(**data_dict['sender']),
+    dest=client(**data_dict['dest']),
+    when=data_dict['when'],
+    _from=data_dict['_from']
+)
+
+print(chat_msg)

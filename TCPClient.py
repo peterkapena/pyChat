@@ -76,10 +76,6 @@ class ChatApp:
         for m in logs:
             self.chat_log.add_message(m)
 
-    def get_client(self) -> client:
-        return client(
-            self.client_socket.getsockname[0], self.client_socket.getsockname[1], self.username, True)
-
     def send_message(self, _=None):
         self.chats: List[chat_message] = []
         addr = self.client_socket.getsockname()[0]
@@ -153,8 +149,16 @@ class ChatApp:
             self.render_online_user()
 
     def incoming_chat_handler(self, body: str, source: client):
-        chat = json.loads(body, object_hook=lambda d: chat_message(**d))
-        print(chat)
+        data_dict = json.loads(body)
+        chat_msg = chat_message(
+            text=data_dict['text'],
+            sender=client(**data_dict['sender']),
+            dest=client(**data_dict['dest']),
+            when=data_dict['when'],
+            _from=data_dict['_from']
+        )
+
+        print(chat_msg)
 
     response_actions = {
         1: i_am_alive_response_handler,
