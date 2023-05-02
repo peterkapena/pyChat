@@ -26,11 +26,6 @@ class ChatApp:
         self.users: List[client] = []
         self.set_left_frame()
         self.set_right_frame()
-        self.chat_log = ChatLog(self.right_frame)
-        self.chat_log.pack(side=tk.BOTTOM, fill=tk.BOTH, expand=True)
-        # self.set_chat_log()
-
-        self.chats: List[chat_message] = []
 
         self.connect_to_server()
 
@@ -38,18 +33,22 @@ class ChatApp:
         self.right_frame = tk.Frame(self.master, bg="#A6BDB9")
         self.right_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
-        # self.current_chat_user = None
-        # Set up the label for the current user being chatted to
-        # if self.current_chat_user:
         self.chatting_with_str = StringVar()
         self.chatting_with_label = tk.Label(
             self.right_frame, textvariable=self.chatting_with_str, font=("Arial", 14), bg="#A6BDB9")
         self.chatting_with_label.pack(side=tk.TOP, padx=10, pady=10)
 
-        # Set up the input field and send button
+        self.chat_log = ChatLog(self.right_frame)
+        self.chat_log.pack(side=tk.BOTTOM, fill=tk.BOTH, expand=True)
+        # self.set_chat_log()
+        self.chat_log.pack_forget()
 
+        self.chats: List[chat_message] = []
+
+        # Set up the input field and send button
         self.send_frame = tk.Frame(self.right_frame, bg="#A6BDB9")
         self.send_frame.pack(side=tk.BOTTOM, fill=tk.BOTH, expand=True)
+        self.send_frame.pack_forget()
 
         self.input_field = tk.Entry(self.send_frame, font=("Arial", 14))
         self.input_field.pack(side=tk.LEFT, padx=10,
@@ -122,6 +121,8 @@ class ChatApp:
         self.current_chat_user = user
         self.chatting_with_str.set(
             f"Chatting with: {user.addr} - {user.port} - {user.user_name}")
+        self.chat_log.pack()
+        self.send_frame.pack()
 
     def render_online_user(self):
         for child in self.online_users_frame.winfo_children():
