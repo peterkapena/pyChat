@@ -1,8 +1,6 @@
 from dataclasses import dataclass
-from datetime import datetime
 from enum import Enum
 from socket import *
-from typing import List
 import json
 
 
@@ -18,11 +16,6 @@ class client:
     user_name: str
     isonLine: bool = False
 
-    # def __init__(self, addr: str, port: int, user_name: str):
-    #     self.addr = addr
-    #     self.port = port
-    #     self.user_name = user_name
-
 
 @dataclass
 class Message:
@@ -31,15 +24,6 @@ class Message:
     body: str = ""
     user_name: str = ""
     dest: client = None
-
-
-# @dataclass
-# class I_am_alive:
-#     clients: List[client]
-
-# class user:
-#     isOnline: bool
-#     client: client
 
 
 class JSON(json.JSONEncoder):

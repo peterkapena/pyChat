@@ -62,8 +62,6 @@ def broadcast(data, sender: socket, action: MessageActions, request: Message):
 actions = {
     1: i_am_alive_request_handler,
     2: forward_chat,
-
-
 }
 
 # Store a list of connected clients
