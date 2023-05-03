@@ -30,7 +30,8 @@ def i_am_alive_request_handler(request: Message, sender: socket):
             cls.append(client(peer[0], peer[1], request.user_name, True))
 
         if len(cls) > 1:
-            broadcast(cls, sender, MessageActions.I_AM_ALIVE, request)
+            broadcast(cls, sender, MessageActions.I_AM_ALIVE,
+                      request.user_name)
 
 
 def forward_chat(request: Message, sender: socket):
@@ -44,14 +45,14 @@ def forward_chat(request: Message, sender: socket):
             dest_socket.send(json_data.encode())
 
 
-def broadcast(data, sender: socket, action: MessageActions, request: Message):
+def broadcast(data, sender: socket, action: MessageActions, user_name: str):
     """Send a message to all connected clients except the sender."""
 
     json_string = json.dumps(data, cls=JSON)
 
     peer = sender.getpeername()
     message = Message(action=action.value, source=client(
-        peer[0], peer[1], request.user_name, True), body=json_string)
+        peer[0], peer[1], user_name, True), body=json_string)
 
     j = json.dumps(message, cls=JSON)
     for c in clients:
@@ -87,20 +88,11 @@ def handle_client_requests(sender: socket, client_address):
             if request:
                 actions.get(request.action)(request, sender)
 
-            else:
-                # If no data is received, remove the client from the list of connected clients
-                with clients_lock:
-                    clients.remove(sender)
-                print(f"Connection closed with {client_address}")
-                sender.close()
-                break
         except Exception as e:
             print(f"Error: {e}")
             with clients_lock:
                 if sender in clients:
                     clients.remove(sender)
-            # sender.close()
-            break
 
 
 while True:
