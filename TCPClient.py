@@ -40,10 +40,8 @@ class ChatApp:
 
         self.chat_log = ChatLog(self.right_frame)
         self.chat_log.pack(side=tk.BOTTOM, fill=tk.BOTH, expand=True)
-        # self.set_chat_log()
-        self.chat_log.pack_forget()
 
-        self.chats: List[chat_message] = []
+        self.chat_log.pack_forget()
 
         # Set up the input field and send button
         self.send_frame = tk.Frame(self.right_frame, bg="#A6BDB9")
@@ -72,12 +70,6 @@ class ChatApp:
         self.online_users_frame = tk.Frame(self.left_frame, bg="#1C413A")
         self.online_users_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
-    def set_chat_log(self, sender: client):
-        logs = list(filter(lambda c: c.sender.addr == sender.addr
-                           and c.sender.port == sender.port, self.chats))
-        for m in logs:
-            self.chat_log.add_message(m)
-
     def send_message(self, _=None):
         addr = self.client_socket.getsockname()[0]
         port = self.client_socket.getsockname()[1]
@@ -93,11 +85,9 @@ class ChatApp:
         action = MessageActions.SENDING_MESSAGE.value
         message = Message(action, sender, json_string, un, u)
         json_data = json.dumps(message, cls=JSON)
-        # print(json_data)
         self.client_socket.send(json_data.encode())
 
-        self.chats.append(chat)
-        self.set_chat_log(sender)
+        self.chat_log.add_message(chat)
         self.input_field.delete(0, tk.END)
 
     def connect_to_server(self):
@@ -160,9 +150,7 @@ class ChatApp:
             _from=NOT_ME
         )
 
-        self.chats.append(chat_msg)
-        self.set_chat_log(chat_msg.sender)
-        # print(chat_msg)
+        self.chat_log.add_message(chat_msg)
 
     response_actions = {
         1: i_am_alive_response_handler,
