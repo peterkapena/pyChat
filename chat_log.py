@@ -13,7 +13,8 @@ class ChatLog(tk.Frame):
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
         self.canvas = tk.Canvas(
-            self, bg="white", width=self.winfo_reqwidth(), highlightthickness=0)
+            self, bg="white", width=self.winfo_reqwidth(), highlightthickness=0,
+            height=500)
         self.canvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True,)
 
         self.message_frame = tk.Frame(self.canvas)
