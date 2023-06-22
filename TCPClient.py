@@ -4,8 +4,8 @@ from tkinter import StringVar, simpledialog
 from threading import *
 from socket import *
 import time
-from chat_log import ChatLog
-from message import DEFAULT_DATE_TIME_FORMAT, JSON, ME, NOT_ME, UNKNOWN, Message, MessageActions, chat_message, client
+from chat_client.chat_log import ChatLog
+from chat_client.message import DEFAULT_DATE_TIME_FORMAT, JSON, ME, NOT_ME, UNKNOWN, Message, MessageActions, chat_message, client
 import json
 from typing import List
 
@@ -50,7 +50,7 @@ class ChatApp:
 
         self.input_field = tk.Entry(self.send_frame, font=("Arial", 14))
         self.input_field.pack(side=tk.LEFT, padx=10,
-                              pady=10, fill=tk.X, expand=True)
+                            pady=10, fill=tk.X, expand=True)
         self.input_field.bind("<Return>", self.send_message)
 
         self.send_button = tk.Button(self.send_frame, text="Send", font=(
@@ -124,7 +124,7 @@ class ChatApp:
             user_label.pack(side=tk.TOP, padx=10, pady=10,)
             user_label.bind(
                 "<Button-1>", lambda _: self.set_current_chat_user(c))
-
+        
     def i_am_alive_response_handler(self, body: str, source: client):
 
         clients: List[client] = json.loads(

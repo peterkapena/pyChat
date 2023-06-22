@@ -1,7 +1,7 @@
 import json
 from socket import *
 import threading
-from message import JSON, Message, MessageActions, client
+from chat_client.message import JSON, Message, MessageActions, client
 from typing import List
 
 BUFFER_SIZE = 1024
