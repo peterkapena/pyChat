@@ -1,3 +1,4 @@
 1. Who is online. An array of clients that are online
 2. reconnect on failure to the server
-py TCPClient.py 
+py client/index.py
+py server/index.py

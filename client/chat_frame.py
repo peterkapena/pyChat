@@ -5,7 +5,7 @@ from tkinter import StringVar
 from threading import *
 from socket import *
 from chat_log import ChatLog
-from message import DEFAULT_DATE_TIME_FORMAT, JSON, ME, NOT_ME, UNKNOWN, Message, MessageActions, chat_message, client
+from message import DEFAULT_DATE_TIME_FORMAT, JSON, ME, NOT_ME,  Message, MessageActions, chat_message, client
 import json
 from typing import List
 
@@ -60,7 +60,7 @@ class ChatFrame(tk.Frame):
         self.send_frame.pack_forget()
 
         self.input_field = tk.Entry(self.send_frame, font=("Arial", 14))
-        self.input_field.pack(side=tk.LEFT, padx=10,
+        self.input_field.pack(side=tk.LEFT,
                               pady=10, fill=tk.X, expand=True)
         self.input_field.bind("<Return>", self.send_message)
 
@@ -88,18 +88,19 @@ class ChatFrame(tk.Frame):
         u = self.current_chat_user
         sender = client(addr, port, un, True)
         t = self.input_field.get()
-        when = datetime.utcnow().strftime(DEFAULT_DATE_TIME_FORMAT)
+        if t:
+            when = datetime.utcnow().strftime(DEFAULT_DATE_TIME_FORMAT)
 
-        chat: chat_message = chat_message(t, sender, u, when, ME)
+            chat: chat_message = chat_message(t, sender, u, when, ME)
 
-        json_string = json.dumps(chat, cls=JSON)
-        action = MessageActions.SENDING_MESSAGE.value
-        message = Message(action, sender, json_string, un, u)
-        json_data = json.dumps(message, cls=JSON)
-        self.client_socket.send(json_data.encode())
+            json_string = json.dumps(chat, cls=JSON)
+            action = MessageActions.SENDING_MESSAGE.value
+            message = Message(action, sender, json_string, un, u)
+            json_data = json.dumps(message, cls=JSON)
+            self.client_socket.send(json_data.encode())
 
-        self.chat_log.add_message(chat)
-        self.input_field.delete(0, tk.END)
+            self.chat_log.add_message(chat)
+            self.input_field.delete(0, tk.END)
 
     def connect_to_server(self):
         self.server_address = ('localhost', 12000)
