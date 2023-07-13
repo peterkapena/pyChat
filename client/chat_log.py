@@ -19,7 +19,7 @@ class ChatLog(tk.Frame):
 
         self.message_frame = tk.Frame(self.canvas)
         self.canvas.create_window(
-            (0, 0), window=self.message_frame, anchor="nw", width=573)
+            (0, 0), window=self.message_frame, anchor="nw", width=563)
 
         # configure the scrollbar to scroll the canvas
         scrollbar.config(command=self.canvas.yview)

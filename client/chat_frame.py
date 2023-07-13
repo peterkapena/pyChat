@@ -9,7 +9,7 @@ from message import DEFAULT_DATE_TIME_FORMAT, JSON, ME, NOT_ME,  Message, Messag
 import json
 from typing import List
 
-server = "localhost"
+server = "102.37.221.168"
 # "102.37.221.168"
 # "localhost"
 
