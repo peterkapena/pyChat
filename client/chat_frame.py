@@ -9,7 +9,7 @@ from message import DEFAULT_DATE_TIME_FORMAT, JSON, ME, NOT_ME,  Message, Messag
 import json
 from typing import List
 
-server = "localhost"  # "102.37.221.168"
+server = "102.37.221.168"  # "localhost"
 
 
 class ChatFrame(tk.Frame):
@@ -118,7 +118,7 @@ class ChatFrame(tk.Frame):
         message = Message(action=action, user_name=self.username)
         json_data = json.dumps(message.__dict__)
         self.client_socket.send(json_data.encode())
-        self.master.after(10000, self.send_i_am_alive_message)
+        self.master.after(3000, self.send_i_am_alive_message)
 
     def set_current_chat_user(self, user: client):
         print(user.port)
