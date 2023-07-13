@@ -1,1 +1,1 @@
-# A simple chat application with python Socket via UDP protocol
+# A simple chat application with python Socket via UDP/TCP protocol
