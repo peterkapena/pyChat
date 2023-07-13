@@ -9,7 +9,9 @@ from message import DEFAULT_DATE_TIME_FORMAT, JSON, ME, NOT_ME,  Message, Messag
 import json
 from typing import List
 
-server = "102.37.221.168"  # "localhost"
+server = "localhost"
+# "102.37.221.168"
+# "localhost"
 
 
 class ChatFrame(tk.Frame):
@@ -24,6 +26,7 @@ class ChatFrame(tk.Frame):
         self.users: List[client] = []
         self.set_left_frame()
         self.set_right_frame()
+        self.online_users: List[client] = []
 
         self.connect_to_server()
 
@@ -128,33 +131,17 @@ class ChatFrame(tk.Frame):
         self.chat_log.pack()
         self.send_frame.pack()
 
-    def render_online_user(self):
-        for child in self.online_users_frame.winfo_children():
-            child.destroy()
-
-        for c in self.users:
+    def i_am_alive_response_handler(self, _: str, source: client):
+        if not source in self.online_users:
+            print(source)
+            self.online_users.append(source)
             user_label = tk.Button(
-                self.online_users_frame, text=f"{c.addr} - {c.port} - {c.user_name}", font=("Arial", 12), bg="#05231e", fg="white")
+                self.online_users_frame, text=f"{source.addr} - {source.port} - {source.user_name}", font=("Arial", 12), bg="#05231e", fg="white")
             user_label.pack(side=tk.TOP, padx=10, pady=10,)
             user_label.bind(
-                "<Button-1>", lambda _: self.set_current_chat_user(c))
+                "<Button-1>", lambda _: self.set_current_chat_user(source))
 
-    def i_am_alive_response_handler(self, body: str, source: client):
-
-        clients: List[client] = json.loads(
-            body, object_hook=lambda d: client(**d))
-
-        print(source)
-        for c in clients:
-            # if the client equals the source client or it is already in the list of users, skip it
-            if (self.client_socket.getsockname()[0] == c.addr and self.client_socket.getsockname()[1] == c.port) or c in self.users:
-                continue
-            self.users.append(c)
-
-        if len(clients) != len(self.users):
-            self.render_online_user()
-
-    def incoming_chat_handler(self, body: str, source: client):
+    def incoming_chat_handler(self, body: str, _: client):
         data_dict = json.loads(body)
         chat_msg = chat_message(
             text=data_dict['text'],

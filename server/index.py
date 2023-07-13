@@ -23,15 +23,15 @@ def add_client(sender: socket):
 
 
 def i_am_alive_request_handler(request: Message, sender: socket):
-    with clients_lock:
-        cls = []
-        for c in clients:
-            peer = c.getpeername()
-            cls.append(client(peer[0], peer[1], request.user_name, True))
+    if len(clients) > 1:
+        peer = sender.getpeername()
+        message = Message(action=MessageActions.I_AM_ALIVE.value, source=client(
+            peer[0], peer[1], request.user_name, True), body=None)
 
-        if len(cls) > 1:
-            broadcast(cls, sender, MessageActions.I_AM_ALIVE,
-                      request.user_name)
+        j = json.dumps(message, cls=JSON)
+        for c in clients:
+            if c.getpeername() != sender.getpeername():
+                c.send(j.encode())
 
 
 def forward_chat(request: Message, sender: socket):
@@ -43,21 +43,6 @@ def forward_chat(request: Message, sender: socket):
         if dest_socket:
             json_data = json.dumps(request, cls=JSON)
             dest_socket.send(json_data.encode())
-
-
-def broadcast(data, sender: socket, action: MessageActions, user_name: str):
-    """Send a message to all connected clients except the sender."""
-
-    json_string = json.dumps(data, cls=JSON)
-
-    peer = sender.getpeername()
-    message = Message(action=action.value, source=client(
-        peer[0], peer[1], user_name, True), body=json_string)
-
-    j = json.dumps(message, cls=JSON)
-    for c in clients:
-        if c.getpeername() != sender.getpeername():
-            c.send(j.encode())
 
 
 actions = {
