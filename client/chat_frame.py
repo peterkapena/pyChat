@@ -9,6 +9,8 @@ from message import DEFAULT_DATE_TIME_FORMAT, JSON, ME, NOT_ME,  Message, Messag
 import json
 from typing import List
 
+server = "localhost"  # "102.37.221.168"
+
 
 class ChatFrame(tk.Frame):
     def __init__(self, master, username):
@@ -103,7 +105,7 @@ class ChatFrame(tk.Frame):
             self.input_field.delete(0, tk.END)
 
     def connect_to_server(self):
-        self.server_address = ('localhost', 12000)
+        self.server_address = (server, 12000)
         self.client_socket = socket(AF_INET, SOCK_STREAM)
         self.client_socket.connect(self.server_address)
         self.master.title(

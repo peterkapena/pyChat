@@ -82,6 +82,11 @@ def handle_client_requests(sender: socket, client_address):
         try:
             # Receive data from the client
             request = sender.recv(BUFFER_SIZE)
+
+            # If the received data is empty, the client has disconnected
+            if not request:
+                break
+
             json_data = json.loads(request)
             request = Message(**json_data)
 
@@ -90,9 +95,13 @@ def handle_client_requests(sender: socket, client_address):
 
         except Exception as e:
             print(f"Error: {e}")
-            with clients_lock:
-                if sender in clients:
-                    clients.remove(sender)
+            break
+
+    # Remove the disconnected client from the clients list
+    with clients_lock:
+        if sender in clients:
+            clients.remove(sender)
+    print(f"Client {client_address} disconnected")
 
 
 while True:
