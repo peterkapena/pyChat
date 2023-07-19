@@ -45,31 +45,24 @@ class ChatLog(tk.Frame):
 
     def add_message(self, message: chat_message):
         bg_color = "lightblue" if message._from == ME else "white"
+        sender_or_dest = "To: " + message.dest.user_name if message._from == ME else "From: " + \
+            message.sender.user_name
 
         message_frame = tk.Frame(self.message_frame, bg=bg_color)
-        # sender_label = tk.Label(message_frame, text=message.sender.user_name, font=(
-        #     "Arial", 8, "bold"), fg="gray", bg=bg_color)
+
         text_label = tk.Label(message_frame, text=message.text, font=(
             "Arial", 10), wraplength=300, justify="left", fg="black", bg=bg_color)
         time_label = tk.Label(message_frame, text=message.when, font=(
             "Arial", 8), fg="gray", bg=bg_color)
+        sender_or_dest_label = tk.Label(message_frame, text=sender_or_dest, font=(
+            "Arial", 8, "italic"), fg="gray", bg=bg_color)
 
-        if message._from == ME:
-            message_frame.grid_columnconfigure(0, weight=1)
-            text_label.grid(row=0, column=0, padx=(
-                0, 5), pady=(5, 0), sticky="e")
-            # sender_label.grid(row=1, column=0, padx=(0, 5),
-            #                   pady=(0, 5), sticky="e")
-            time_label.grid(row=2, column=0, padx=(
-                0, 5), pady=(0, 5), sticky="e")
-        else:
-            message_frame.grid_columnconfigure(0, weight=1)
-            text_label.grid(row=0, column=0, padx=(
-                5, 0), pady=(5, 0), sticky="w")
-            # sender_label.grid(row=1, column=0, padx=(5, 0),
-            #                   pady=(0, 5), sticky="w")
-            time_label.grid(row=2, column=0, padx=(
-                5, 0), pady=(0, 5), sticky="w")
+        message_frame.grid_columnconfigure(0, weight=1)
+        sticky = "e" if message._from == ME else "w"
+
+        text_label.grid(row=0,  sticky=sticky)
+        time_label.grid(row=2,  sticky=sticky)
+        sender_or_dest_label.grid(row=3,  sticky=sticky)
 
         message_frame.bind("<MouseWheel>", lambda e: self.canvas.yview_scroll(
             int(-1 * (e.delta / 120)), "units"))
@@ -88,3 +81,11 @@ class ChatLog(tk.Frame):
     def load_messages(self, messages):
         for message in messages:
             self.add_message(message)
+
+    def clear_chat_log(self):
+        """Clears the chat log by removing all the message_frame widgets from self.message_frame."""
+
+        for message_frame in self.message_frame.winfo_children():
+            message_frame.destroy()
+
+        self.canvas.config(scrollregion=self.canvas.bbox("all"))

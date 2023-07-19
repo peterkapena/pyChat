@@ -116,7 +116,6 @@ class ChatFrame(tk.Frame):
         self.master.after(3000, self.send_i_am_alive_message)
 
     def set_current_chat_user(self, user: client):
-        print(user.port)
         self.current_chat_user = user
         self.chatting_with_str.set(
             f"Chatting with: {user.addr} - {user.port} - {user.user_name}")
@@ -125,7 +124,6 @@ class ChatFrame(tk.Frame):
 
     def i_am_alive_response_handler(self, _: str, source: client):
         if not source in self.online_users:
-            print(source)
             self.online_users.append(source)
             user_label = tk.Button(
                 self.online_users_frame, text=f"{source.addr} - {source.port} - {source.user_name}", font=("Arial", 12), bg="#05231e", fg="white")
