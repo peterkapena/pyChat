@@ -104,7 +104,7 @@ class ChatFrame(tk.Frame):
         self.client_socket = socket(AF_INET, SOCK_STREAM)
         self.client_socket.connect(self.server_address)
         self.master.title(
-            f"{self.username} - {self.client_socket.getsockname()}")
+            f"{self.username} / {self.client_socket.getsockname()}")
         self.send_i_am_alive_message()
         Thread(target=self.handle_response).start()
 
