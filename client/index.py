@@ -8,7 +8,6 @@ class Application(tk.Tk):
         super().__init__()
         self.title("Chat App")
         self.geometry("800x600")
-        self.resizable(False, False)
         self.configure(bg="#1C413A")
         
         self.login_page = LoginPage(self, self.login_success)

@@ -9,7 +9,7 @@ from message import DEFAULT_DATE_TIME_FORMAT, JSON, ME, NOT_ME,  Message, Messag
 import json
 from typing import List
 
-server = "102.37.221.168"
+server = "localhost"
 # "102.37.221.168"
 # "localhost"
 
@@ -33,14 +33,6 @@ class ChatFrame(tk.Frame):
     def create_widgets(self):
         self.configure(bg="#1C413A")
         self.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-
-        # self.username_label = tk.Label(
-        #     self, text="Logged in as: {}".format(self.username))
-        # self.username_label.pack()
-
-        # self.logout_button = tk.Button(
-        #     self, text="Logout", command=self.logout)
-        # self.logout_button.pack()
 
     def logout(self):
         self.master.show_login_page()
