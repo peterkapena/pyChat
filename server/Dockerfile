@@ -15,5 +15,5 @@ CMD ["python", "index.py"]
 
 ### Useful commands
 #docker build -t py_chat_server .
-#docker run -p 12000:12000 py_chat_server 
+#docker run -d -p 12000:12000 kapenapeter/py_chat_server 
 #docker ps
