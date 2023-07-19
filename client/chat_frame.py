@@ -149,7 +149,8 @@ class ChatFrame(tk.Frame):
             _from=NOT_ME
         )
 
-        self.chat_log.add_message(chat_msg)
+        if self.current_chat_user is chat_msg.sender:
+            self.chat_log.add_message(chat_msg)
         self.storage.add_message(chat_msg.sender, chat_msg)
         # print(chat_msg)
 
