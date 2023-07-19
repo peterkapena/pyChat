@@ -20,6 +20,7 @@ class ChatFrame(tk.Frame):
         super().__init__(master)
         self.username = username
         self.storage = MessageStorage()
+        self.current_chat_user = None
 
         self.create_widgets()
 
@@ -149,10 +150,14 @@ class ChatFrame(tk.Frame):
             _from=NOT_ME
         )
 
-        if self.current_chat_user is chat_msg.sender:
+        if not self.current_chat_user:
+            self.set_current_chat_user(chat_msg.sender)
             self.chat_log.add_message(chat_msg)
+
+        if self.current_chat_user == chat_msg.sender:
+            self.chat_log.add_message(chat_msg)
+
         self.storage.add_message(chat_msg.sender, chat_msg)
-        # print(chat_msg)
 
     response_actions = {
         1: i_am_alive_response_handler,
