@@ -5,6 +5,7 @@ from tkinter import StringVar
 from threading import *
 from socket import *
 from chat_log import ChatLog
+from message_store import MessageStorage
 from message import DEFAULT_DATE_TIME_FORMAT, JSON, ME, NOT_ME,  Message, MessageActions, chat_message, client
 import json
 from typing import List
@@ -18,6 +19,8 @@ class ChatFrame(tk.Frame):
     def __init__(self, master, username):
         super().__init__(master)
         self.username = username
+        self.storage = MessageStorage()
+
         self.create_widgets()
 
         if self.username:
@@ -97,6 +100,7 @@ class ChatFrame(tk.Frame):
             self.client_socket.send(json_data.encode())
 
             self.chat_log.add_message(chat)
+            self.storage.add_message(chat.dest, chat)
             self.input_field.delete(0, tk.END)
 
     def connect_to_server(self):
@@ -121,6 +125,10 @@ class ChatFrame(tk.Frame):
             f"Chatting with: {user.addr} - {user.port} - {user.user_name}")
         self.chat_log.pack()
         self.send_frame.pack()
+        self.chat_log.clear_chat_log()
+        messages = self.storage.get_messages(user)
+        print(messages)
+        self.chat_log.load_messages(messages)
 
     def i_am_alive_response_handler(self, _: str, source: client):
         if not source in self.online_users:
@@ -142,6 +150,8 @@ class ChatFrame(tk.Frame):
         )
 
         self.chat_log.add_message(chat_msg)
+        self.storage.add_message(chat_msg.sender, chat_msg)
+        # print(chat_msg)
 
     response_actions = {
         1: i_am_alive_response_handler,
