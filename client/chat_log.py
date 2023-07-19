@@ -13,13 +13,12 @@ class ChatLog(tk.Frame):
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
         self.canvas = tk.Canvas(
-            self, bg="white", width=self.winfo_reqwidth(), highlightthickness=0,
-            height=500)
-        self.canvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True,)
+            self, bg="white", highlightthickness=0, height=500)
+        self.canvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
         self.message_frame = tk.Frame(self.canvas)
-        self.canvas.create_window(
-            (0, 0), window=self.message_frame, anchor="nw", width=563)
+        self.canvas_frame = self.canvas.create_window(
+            (0, 0), window=self.message_frame, anchor="nw")
 
         # configure the scrollbar to scroll the canvas
         scrollbar.config(command=self.canvas.yview)
@@ -34,10 +33,15 @@ class ChatLog(tk.Frame):
         self.bind("<MouseWheel>", lambda e: self.canvas.yview_scroll(
             int(-1 * (e.delta / 120)), "units"))
         master.bind("<MouseWheel>", lambda e: self.canvas.yview_scroll(
-                    int(-1 * (e.delta / 120)), "units"))
+            int(-1 * (e.delta / 120)), "units"))
 
         # resize the canvas when the parent container is resized
-        self.bind("<Configure>", lambda e: self.canvas.config(width=e.width))
+        self.bind("<Configure>", self.resize_canvas)
+
+    def resize_canvas(self, event):
+        self.canvas.itemconfigure(self.canvas_frame, width=event.width-10)
+        self.canvas.configure(
+            scrollregion=self.canvas.bbox("all"), width=event.width)
 
     def add_message(self, message: chat_message):
         bg_color = "lightblue" if message._from == ME else "white"
